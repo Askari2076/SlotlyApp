@@ -8,7 +8,7 @@ A clean, responsive, single-page web application designed for tracking daily tim
 ## Features
 - **72 Slots / Day**: 12:00 AM to 11:40 PM broken into 20-minute slots with Night, Morning, Afternoon, and Evening period groupings.
 - **Quick Range Fill**: Log continuous blocks of time (e.g. 2:00 PM - 4:40 PM) across multiple slots at once.
-- **Customizable Categories & Goals**: 13 default categories with custom color palettes, emojis, and daily target hours.
+- **Customizable Categories & Goals**: 20 default categories (Work, Coding, Study, Reading, Ibadah, Quran, Family, Friends, Meals, Coffee Break, Commute, Exercise, Shower, Rest, Social Media, Errands, Chores, Planning, etc.) with custom color palettes, emojis, and daily target hours.
 - **Daily Analytics**: Donut chart breakdown, top category detector, target goals achievement counter.
 - **Multi-Day Trends & History**: Stacked bar charts (7/14/30 days), category line focus tracker, and detailed summary tables.
 - **Data Backup & Export**: Save data to browser `localStorage`, export/import JSON backups, and export CSV logs.

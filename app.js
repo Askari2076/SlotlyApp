@@ -9,33 +9,43 @@
   const STORAGE_KEY = 'slotly_time_tracker_v1';
   const TOTAL_SLOTS = 72; // 24 hours * 3 slots/hr
 
-  // Initial 13 default categories as specified
+  // Initial expanded default categories as requested
   const DEFAULT_CATEGORIES = [
-    { id: 'work', name: 'Office / Work', emoji: '💼', color: '#3b82f6', goalHours: 8 },
-    { id: 'learning', name: 'Learning / Study', emoji: '📚', color: '#8b5cf6', goalHours: 2 },
-    { id: 'allah', name: 'For Allah (Ibadah/Prayer)', emoji: '🕌', color: '#10b981', goalHours: 1.5 },
+    { id: 'work', name: 'Office / Work', emoji: '💼', color: '#3b82f6', goalHours: 6 },
+    { id: 'coding', name: 'Coding / Dev', emoji: '💻', color: '#06b6d4', goalHours: 3 },
+    { id: 'learning', name: 'Study / Course', emoji: '📚', color: '#8b5cf6', goalHours: 2 },
+    { id: 'reading', name: 'Reading Books', emoji: '📖', color: '#10b981', goalHours: 1 },
+    { id: 'allah', name: 'For Allah (Ibadah)', emoji: '🕌', color: '#059669', goalHours: 1.5 },
+    { id: 'quran', name: 'Quran / Recitation', emoji: '🕋', color: '#14b8a6', goalHours: 0.5 },
     { id: 'family', name: 'With Family', emoji: '👨‍👩‍👧', color: '#ec4899', goalHours: 2 },
     { id: 'friends', name: 'With Friends', emoji: '🧑‍🤝‍🧑', color: '#f59e0b', goalHours: 1 },
+    { id: 'meals', name: 'Meals / Dining', emoji: '🍽️', color: '#eab308', goalHours: 1.5 },
+    { id: 'coffeebreak', name: 'Tea / Coffee Break', emoji: '☕', color: '#d97706', goalHours: 0.5 },
+    { id: 'commute', name: 'Commute / Travel', emoji: '🚗', color: '#f97316', goalHours: 1 },
+    { id: 'exercise', name: 'Exercise / Gym', emoji: '🏃', color: '#ef4444', goalHours: 1 },
+    { id: 'shower', name: 'Shower / Grooming', emoji: '🚿', color: '#0284c7', goalHours: 0.5 },
     { id: 'washroom', name: 'Washroom', emoji: '🚻', color: '#64748b', goalHours: 0 },
-    { id: 'shower', name: 'Shower', emoji: '🚿', color: '#06b6d4', goalHours: 0 },
-    { id: 'meals', name: 'Meals', emoji: '🍽️', color: '#eab308', goalHours: 1.5 },
-    { id: 'commute', name: 'Commute', emoji: '🚗', color: '#f97316', goalHours: 1 },
-    { id: 'exercise', name: 'Exercise / Health', emoji: '🏃', color: '#ef4444', goalHours: 1 },
-    { id: 'rest', name: 'Rest / Sleep', emoji: '😴', color: '#6366f1', goalHours: 7 },
-    { id: 'entertainment', name: 'Entertainment / Scrolling', emoji: '📱', color: '#a855f7', goalHours: 1 },
+    { id: 'rest', name: 'Rest / Sleep / Nap', emoji: '😴', color: '#6366f1', goalHours: 7 },
+    { id: 'scrolling', name: 'Social Media / Scrolling', emoji: '📱', color: '#a855f7', goalHours: 0.5 },
+    { id: 'errands', name: 'Shopping / Errands', emoji: '🛒', color: '#84cc16', goalHours: 0 },
+    { id: 'chores', name: 'House Chores / Cleaning', emoji: '🧹', color: '#e11d48', goalHours: 0 },
+    { id: 'planning', name: 'Planning / Journaling', emoji: '🧠', color: '#9333ea', goalHours: 0.5 },
     { id: 'others', name: 'Others', emoji: '➕', color: '#94a3b8', goalHours: 0 }
   ];
 
   const COLOR_PALETTES = [
     '#3b82f6', '#8b5cf6', '#10b981', '#ec4899', '#f59e0b',
     '#06b6d4', '#eab308', '#f97316', '#ef4444', '#6366f1',
-    '#a855f7', '#14b8a6', '#84cc16', '#64748b', '#e11d48'
+    '#a855f7', '#14b8a6', '#84cc16', '#64748b', '#e11d48',
+    '#059669', '#d97706', '#0284c7', '#9333ea', '#475569'
   ];
 
   const QUICK_PRESETS = [
-    'Fajr Prayer & Quran', 'Dhuhr Prayer', 'Asr Prayer', 'Maghrib Prayer', 'Isha Prayer',
-    'Deep Work Session', 'Emails & Slack', 'Meeting / Call', 'Reading Technical Book',
-    'Family Dinner', 'Exercise Workout', 'Power Nap / Rest', 'Walking / Jogging', 'Lunch Break'
+    'Fajr Prayer & Morning Adhkar', 'Dhuhr Prayer', 'Asr Prayer', 'Maghrib Prayer', 'Isha Prayer',
+    'Read Quran & Tafseer', 'Deep Work / Coding', 'Fixed Notebook Bug', 'Read Keepa Chart',
+    'Team Meeting / Sync Call', 'Answering Emails & Messages', 'Studying Online Course',
+    'Reading Non-Fiction Book', 'Family Lunch / Dinner', 'Evening Walk / Workout',
+    'Coffee / Tea Break', 'Power Nap / Rest', 'Groceries & Errands'
   ];
 
   // ---------- APPLICATION STATE ----------
