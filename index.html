@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slotly — 20-Minute Time Tracker</title>
+  <meta name="description" content="Track your daily time and effort in 20-minute slots with rich visual analytics, retroactive logging, quick fill, and customizable category goals.">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Application Bar -->
+  <header class="app-header">
+    <div class="container header-container">
+      <div class="brand">
+        <div class="brand-icon">⏱️</div>
+        <div>
+          <h1 class="brand-title">Slotly <span class="brand-badge">20-Min Tracker</span></h1>
+          <p class="brand-subtitle">72 Slots of Purposeful Living</p>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="app-nav">
+        <button class="nav-tab active" data-tab="tab-daily">
+          <i data-lucide="calendar"></i>
+          <span>Daily Log</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-trends">
+          <i data-lucide="bar-chart-2"></i>
+          <span>Trends & History</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-categories">
+          <i data-lucide="tag"></i>
+          <span>Categories & Goals</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-settings">
+          <i data-lucide="settings"></i>
+          <span>Data & Backup</span>
+        </button>
+      </nav>
+
+      <!-- Global Actions -->
+      <div class="header-actions">
+        <button class="btn btn-outline" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+          <i data-lucide="moon" id="themeIcon"></i>
+        </button>
+        <button class="btn btn-primary" id="openQuickFillBtn" title="Batch log multiple slots at once (Shortcut: Q)">
+          <i data-lucide="zap"></i>
+          <span>Quick Fill</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="container main-content">
+
+    <!-- Global Date Bar (Sticky below Header) -->
+    <section class="date-bar glass-card">
+      <div class="date-controls">
+        <button class="btn btn-icon btn-secondary" id="prevDayBtn" title="Previous Day (Left Arrow)">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <div class="date-picker-wrapper">
+          <input type="date" id="datePicker" class="date-input">
+          <span class="date-display" id="dateDisplayLabel">Today</span>
+        </div>
+        <button class="btn btn-icon btn-secondary" id="nextDayBtn" title="Next Day (Right Arrow)">
+          <i data-lucide="chevron-right"></i>
+        </button>
+        <button class="btn btn-ghost btn-sm" id="todayBtn" title="Jump to Today (Shortcut: T)">
+          Today
+        </button>
+      </div>
+
+      <!-- Quick Day Progress Indicator -->
+      <div class="day-progress-widget">
+        <div class="progress-info">
+          <span id="loggedSlotsCount">0 / 72 slots logged</span>
+          <span id="loggedPercentage" class="bold-text">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="loggedProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: DAILY LOG VIEW -->
+    <div class="tab-panel active" id="tab-daily">
+      <div class="daily-layout">
+
+        <!-- Timeline Column (72 Slots) -->
+        <div class="timeline-column">
+          <div class="timeline-header">
+            <div>
+              <h2 class="section-heading">20-Minute Daily Slots</h2>
+              <p class="section-subtext">Click any slot to log an activity or use Quick Fill for continuous blocks.</p>
+            </div>
+            <div class="filter-pills">
+              <button class="pill active" data-filter="all">All (72)</button>
+              <button class="pill" data-filter="filled">Filled</button>
+              <button class="pill" data-filter="empty">Empty</button>
+            </div>
+          </div>
+
+          <!-- Slots Container -->
+          <div class="timeline-slots" id="timelineSlotsContainer">
+            <!-- Dynamic 72 slots will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Sticky Summary Sidebar -->
+        <aside class="summary-sidebar">
+          
+          <!-- Key Day Stats -->
+          <div class="glass-card stat-cards-grid">
+            <div class="stat-card">
+              <div class="stat-label">Logged Time</div>
+              <div class="stat-value" id="statTotalLogged">0 hrs 0m</div>
+              <div class="stat-sub" id="statLoggedSlots">0 / 72 slots</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Remaining</div>
+              <div class="stat-value" id="statUnlogged">24 hrs 0m</div>
+              <div class="stat-sub" id="statUnloggedSlots">72 slots open</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Top Category</div>
+              <div class="stat-value highlight-text" id="statTopCategory">—</div>
+              <div class="stat-sub" id="statTopCategoryTime">0 slots</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Goals Met</div>
+              <div class="stat-value success-text" id="statGoalsMet">0 / 0</div>
+              <div class="stat-sub">Target categories</div>
+            </div>
+          </div>
+
+          <!-- Daily Donut Chart -->
+          <div class="glass-card chart-card">
+            <h3 class="card-title">
+              <i data-lucide="pie-chart"></i>
+              Category Distribution
+            </h3>
+            <div class="chart-wrapper">
+              <canvas id="dailyDonutChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Daily Category List Breakdown & Goal Progress -->
+          <div class="glass-card category-breakdown-card">
+            <h3 class="card-title">
+              <i data-lucide="list"></i>
+              Breakdown & Target Goals
+            </h3>
+            <div class="breakdown-list" id="dailyCategoryBreakdownList">
+              <!-- Dynamically populated category breakdown items -->
+            </div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+
+    <!-- TAB 2: TRENDS & HISTORY -->
+    <div class="tab-panel" id="tab-trends">
+      <div class="trends-layout">
+        
+        <!-- Controls & Range Selection -->
+        <div class="glass-card trends-controls-card">
+          <div class="trends-filter-row">
+            <div>
+              <h2 class="section-heading">Multi-Day Trends & Analytics</h2>
+              <p class="section-subtext">Compare your time allocation over days and weeks.</p>
+            </div>
+            <div class="range-selector-buttons">
+              <button class="btn btn-secondary btn-sm range-btn active" data-range="7">Last 7 Days</button>
+              <button class="btn btn-secondary btn-sm range-btn" data-range="14">Last 14 Days</button>
+              <button class="btn btn-secondary btn-sm range-btn" data-range="30">Last 30 Days</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trend Charts Grid -->
+        <div class="trends-charts-grid">
+          <!-- Stacked Bar Chart -->
+          <div class="glass-card chart-card wide">
+            <h3 class="card-title">
+              <i data-lucide="bar-chart-3"></i>
+              Daily Category Distribution (Stacked Hours)
+            </h3>
+            <div class="chart-wrapper large">
+              <canvas id="trendsStackedChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Specific Line Tracker -->
+          <div class="glass-card chart-card wide">
+            <div class="card-header-flex">
+              <h3 class="card-title">
+                <i data-lucide="trending-up"></i>
+                Category Focus Over Time
+              </h3>
+              <select id="lineCategorySelect" class="form-select inline-select">
+                <!-- Dynamically populated with categories -->
+              </select>
+            </div>
+            <div class="chart-wrapper large">
+              <canvas id="trendsLineChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Day Summary Table -->
+        <div class="glass-card table-card">
+          <h3 class="card-title">
+            <i data-lucide="table"></i>
+            Period Summary Table
+          </h3>
+          <div class="table-responsive">
+            <table class="data-table" id="trendsSummaryTable">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Total Time</th>
+                  <th>Daily Avg</th>
+                  <th>Total Slots</th>
+                  <th>Daily Target</th>
+                  <th>Target Achievement</th>
+                </tr>
+              </thead>
+              <tbody id="trendsSummaryTableBody">
+                <!-- Data populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: CATEGORIES & GOALS MANAGER -->
+    <div class="tab-panel" id="tab-categories">
+      <div class="categories-layout">
+        <div class="glass-card categories-header-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="section-heading">Category & Goal Management</h2>
+              <p class="section-subtext">Customize your activity tags, colors, icons, and daily target hours.</p>
+            </div>
+            <button class="btn btn-primary" id="openAddCategoryBtn">
+              <i data-lucide="plus"></i>
+              <span>Add Category</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Categories Grid -->
+        <div class="categories-grid" id="categoriesGridContainer">
+          <!-- Dynamically populated category cards -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: DATA & BACKUP -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="settings-layout">
+        
+        <div class="glass-card settings-card">
+          <h2 class="section-heading">Data Backup & Export</h2>
+          <p class="section-subtext">Your data is stored safely in your browser. Export backups or move your logs anytime.</p>
+          
+          <div class="backup-actions-grid">
+            <div class="backup-box">
+              <div class="backup-icon"><i data-lucide="download"></i></div>
+              <h3>Export JSON Backup</h3>
+              <p>Download full backup including logs and custom categories.</p>
+              <button class="btn btn-primary" id="exportJsonBtn">Export JSON</button>
+            </div>
+
+            <div class="backup-box">
+              <div class="backup-icon"><i data-lucide="file-spreadsheet"></i></div>
+              <h3>Export CSV Spreadsheet</h3>
+              <p>Download logs formatted for Excel, Google Sheets, or Notion.</p>
+              <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+            </div>
+
+            <div class="backup-box">
+              <div class="backup-icon"><i data-lucide="upload"></i></div>
+              <h3>Import JSON File</h3>
+              <p>Restore your data from a previously saved JSON backup file.</p>
+              <label for="importFileInput" class="btn btn-secondary cursor-pointer">Select JSON File</label>
+              <input type="file" id="importFileInput" accept=".json" class="hidden-input">
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card settings-card">
+          <h2 class="section-heading">Data Statistics & Maintenance</h2>
+          <div class="stats-summary-list">
+            <div class="summary-item">
+              <span>Total Days Logged:</span>
+              <strong id="statDaysLogged">0 days</strong>
+            </div>
+            <div class="summary-item">
+              <span>Total 20-Min Slots Logged:</span>
+              <strong id="statTotalSlotsLogged">0 slots</strong>
+            </div>
+            <div class="summary-item">
+              <span>Browser Storage Used:</span>
+              <strong id="statStorageUsed">0 KB</strong>
+            </div>
+          </div>
+
+          <div class="danger-zone">
+            <h3>Clear All Data</h3>
+            <p>Permanently erase all logged slots and reset categories to defaults.</p>
+            <button class="btn btn-danger" id="clearDataBtn">
+              <i data-lucide="trash-2"></i>
+              Reset & Clear All Data
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card settings-card">
+          <h2 class="section-heading">Keyboard Shortcuts</h2>
+          <div class="shortcuts-grid">
+            <div class="shortcut-item"><kbd>Left Arrow</kbd> <span>Previous Day</span></div>
+            <div class="shortcut-item"><kbd>Right Arrow</kbd> <span>Next Day</span></div>
+            <div class="shortcut-item"><kbd>T</kbd> <span>Jump to Today</span></div>
+            <div class="shortcut-item"><kbd>Q</kbd> <span>Open Quick Fill Modal</span></div>
+            <div class="shortcut-item"><kbd>Esc</kbd> <span>Close active modal</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 1: SINGLE SLOT EDIT MODAL -->
+  <div class="modal-backdrop" id="slotModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="slotModalTitle">Edit 20-Min Slot</h3>
+          <span class="slot-modal-time" id="slotModalTimeBadge">08:00 AM - 08:20 AM</span>
+        </div>
+        <button class="btn-close" id="closeSlotModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="slotForm">
+          <div class="form-group">
+            <label class="form-label">Select Category</label>
+            <div class="category-grid-selector" id="slotCategorySelector">
+              <!-- Dynamically rendered category pills with colors and icons -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="slotActivityInput">Activity Description / Notes</label>
+            <input type="text" id="slotActivityInput" class="form-input" placeholder="e.g. Reviewed Q3 report, Evening Prayer, Read book..." autofocus autocomplete="off">
+          </div>
+
+          <!-- Quick Text Presets -->
+          <div class="form-group">
+            <label class="form-label text-muted-sm">Quick Fill Suggestions</label>
+            <div class="quick-preset-chips" id="quickPresetChips">
+              <!-- Dynamically filled with common suggestions -->
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="clearSlotBtn">Clear Slot</button>
+        <div class="flex-gap">
+          <button class="btn btn-secondary" id="saveAndNextSlotBtn">Save & Next Slot →</button>
+          <button class="btn btn-primary" id="saveSlotBtn">Save Slot</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: QUICK RANGE FILL (BATCH LOGGING) -->
+  <div class="modal-backdrop" id="quickFillModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">⚡ Quick Range Fill</h3>
+          <p class="modal-sub">Log continuous blocks of time across multiple 20-min slots at once.</p>
+        </div>
+        <button class="btn-close" id="closeQuickFillModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="quickFillForm">
+          
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label class="form-label" for="quickFillStartSlot">Start Time</label>
+              <select id="quickFillStartSlot" class="form-select">
+                <!-- Dropdown options 00:00 to 23:40 -->
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label class="form-label" for="quickFillEndSlot">End Time</label>
+              <select id="quickFillEndSlot" class="form-select">
+                <!-- Dropdown options 00:20 to 24:00 -->
+              </select>
+            </div>
+          </div>
+
+          <div class="range-info-badge" id="quickFillRangeInfo">
+            <i data-lucide="clock"></i>
+            <span>Selected Range: 5 slots (1 hr 40 mins)</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <div class="category-grid-selector" id="quickFillCategorySelector">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="quickFillActivityInput">Activity Description (Optional)</label>
+            <input type="text" id="quickFillActivityInput" class="form-input" placeholder="e.g. Deep Work on Project Alpha, Family Dinner...">
+          </div>
+
+          <div class="form-group flex-checkbox">
+            <input type="checkbox" id="quickFillOverwriteCheckbox" checked>
+            <label for="quickFillOverwriteCheckbox">Overwrite already filled slots in this range</label>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelQuickFillBtn">Cancel</button>
+        <button class="btn btn-primary" id="applyQuickFillBtn">
+          <i data-lucide="check"></i>
+          <span>Apply to Range</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADD/EDIT CATEGORY MODAL -->
+  <div class="modal-backdrop" id="categoryModalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="categoryModalTitle">Add New Category</h3>
+        <button class="btn-close" id="closeCategoryModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="categoryForm">
+          <input type="hidden" id="categoryFormId">
+          
+          <div class="form-group">
+            <label class="form-label" for="categoryNameInput">Category Name</label>
+            <input type="text" id="categoryNameInput" class="form-input" placeholder="e.g. Reading & Research" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label class="form-label" for="categoryEmojiInput">Emoji / Icon</label>
+              <input type="text" id="categoryEmojiInput" class="form-input emoji-input" placeholder="📚" maxlength="4" required>
+            </div>
+            <div class="form-group col-6">
+              <label class="form-label" for="categoryColorInput">Badge Color</label>
+              <div class="color-picker-row">
+                <input type="color" id="categoryColorInput" class="color-input-swatch" value="#4f46e5">
+                <input type="text" id="categoryColorHex" class="form-input" value="#4f46e5">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="categoryGoalInput">Daily Target Goal (Hours / Day)</label>
+            <input type="number" id="categoryGoalInput" class="form-input" min="0" max="24" step="0.5" placeholder="0 (No target)">
+            <span class="text-muted-sm">Leave at 0 if no specific goal target is needed.</span>
+          </div>
+
+          <!-- Color Preset Swatches -->
+          <div class="form-group">
+            <label class="form-label text-muted-sm">Color Palettes</label>
+            <div class="color-swatches-grid" id="colorSwatchesGrid">
+              <!-- Swatches generated in JS -->
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelCategoryBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveCategoryBtn">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
